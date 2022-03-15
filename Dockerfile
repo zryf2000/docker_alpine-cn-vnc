@@ -1,7 +1,8 @@
 FROM docker.io/rsolano/alpine-vnc
 
 COPY ./locale.md /locale.md
-
+RUN mkdir /usr/share/fonts/wincn
+COPY ./ShangShouJianHeiCuT.ttf /usr/share/fonts/wincn
 # Install language pack
 #RUN echo 'http://mirrors.ustc.edu.cn/alpine/v3.5/main' > /etc/apk/repositories \
 #    && echo 'http://mirrors.ustc.edu.cn/alpine/v3.5/community' >>/etc/apk/repositories \

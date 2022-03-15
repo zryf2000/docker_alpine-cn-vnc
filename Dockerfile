@@ -28,5 +28,5 @@ RUN apk update \
     && rm -rf /var/cache/apk/* \
     && rm "/root/.wget-hsts"  
 
-ENV LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8 
+ENV LANG=zh_CN.UTF-8 \
+    LANGUAGE=zh_CN.UTF-8

@@ -1,74 +1,31 @@
-# alpine-vnc - A basic, graphical alpine workstation
-# includes xfce, vnc, ssh
-# last update: mar/2/2021
+FROM docker.io/rsolano/alpine-vnc
 
-FROM alpine:3.12
+COPY ./locale.md /locale.md
 
-# init ash file (for non-login shells)
-ENV ENV '$HOME/.ashrc'
-
-# default screen size
-ENV XRES 1280x800x24
-
-# default tzdata settings
-ENV TZ Etc/UTC
-
-# update and install system software
+# Install language pack
+#RUN echo 'http://mirrors.ustc.edu.cn/alpine/v3.5/main' > /etc/apk/repositories \
+#    && echo 'http://mirrors.ustc.edu.cn/alpine/v3.5/community' >>/etc/apk/repositories \
+RUN set -eux && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk update \
-	&& apk upgrade \
-	#
-	# main packages
-	&& apk add setup-box sudo supervisor openssh-server openssh nano \
-	&& apk add xvfb x11vnc \
-	#
-	# keyboard and other utils
-	xfce4-xkb-plugin mousepad \
-	#
-	# timezone support
-	tzdata
+    && apk add tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && apk del tzdata \
+    && apk --no-cache add ca-certificates wget \
+    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-2.25-r0.apk \
+        https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-bin-2.25-r0.apk \
+        https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-i18n-2.25-r0.apk \
+    && apk add glibc-bin-2.25-r0.apk glibc-i18n-2.25-r0.apk glibc-2.25-r0.apk \
+    && sleep 3 \
+    && cat /locale.md | xargs -i /usr/glibc-compat/bin/localedef -i {} -f UTF-8 {}.UTF-8 \
+    && rm /etc/apk/keys/sgerrand.rsa.pub \
+    && rm /locale.md \
+        glibc-2.25-r0.apk \
+        glibc-bin-2.25-r0.apk \
+        glibc-i18n-2.25-r0.apk \
+    && apk del wget  ca-certificates\
+    && rm -rf /var/cache/apk/* \
+    && rm "/root/.wget-hsts"  
 
-# run setup-box to setup a desktop + xfce4 workstation
-# but first, patch setup-box to not asking for new user's passwd
-RUN sed -i  's/adduser -h/adduser -D -h/' /sbin/setup-box \
-	&& echo Y | setup-box -v -d xfce -u alpine
-
-# change root passwd and add users and groups 
-# (user alpine alredy added by setup-box)
-RUN	echo "root:alpine" | /usr/sbin/chpasswd \
-    && echo "alpine:alpine" | /usr/sbin/chpasswd \
-    && echo "alpine    ALL=(ALL) ALL" >> /etc/sudoers 	
-
-# setup sshd
-RUN mkdir /run/sshd \
-	&& ssh-keygen -A
-
-# add my sys config files
-ADD etc /etc
-
-# customizations
-
-# ash personal config file for non-login shell mode (as default in xfce terminal)
-# read by ash per ENV=~/.ashrc (see above)
-RUN echo "alias ll='ls -l'" > /home/alpine/.ashrc \
-	&& echo "alias lla='ls -al'" >> /home/alpine/.ashrc \
-	&& echo "alias llh='ls -hl'" >> /home/alpine/.ashrc \
-	&& echo "alias hh=history" >> /home/alpine/.ashrc \
-	#
-	# ash personal config file for login shell mode
-	&& cp /home/alpine/.ashrc /home/alpine/.profile 
-
-# personal xfce4 config
-ADD config/xfce4/terminal/terminalrc /home/alpine/.config/xfce4/terminal/terminalrc
-
-# set custom wallpaper
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml  \
-	/home/alpine/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-
-# RUN chown -R alpine:alpine /home/alpine/.config /home/alpine/.xscreensaver
-RUN chown -R alpine:alpine /home/alpine/
-
-# exposed ports
-EXPOSE 22 5900
-
-# default command
-CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8 

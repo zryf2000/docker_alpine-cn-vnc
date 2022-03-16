@@ -28,8 +28,8 @@ RUN apk update \
     && apk del wget  ca-certificates\
     && rm -rf /var/cache/apk/* \
     && rm "/root/.wget-hsts"  
-RUN x11vnc -storepasswd 1234 ~/.vnc/passwd
-# sed -i 's/usr\/bin\/x11vnc/& --rfbauth ~/.vnc/passwd /g' supervisord.conf
+RUN x11vnc -storepasswd 1234 /etc/x11vnc.pass \
+    && sed -i 's/usr\/bin\/x11vnc/& --rfbauth \/etc\/x11vnc.pass /g' supervisord.conf
 
 ENV LANG=zh_CN.UTF-8 \
     LANGUAGE=zh_CN.UTF-8

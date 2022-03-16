@@ -23,4 +23,9 @@ $ git clone https://github.com/zryf2000/docker_alpine-cn-vnc.git
 # build image
 $ cd zryf2000/docker_alpine-cn-vnc
 $ docker build -t zryf2000/docker_alpine-cn-vnc:v1 .
+
+# run
+$ docker run --rm -p 5900:5900 zryf2000/docker_alpine-cn-vnc:v1
 ``` 
+  
+   

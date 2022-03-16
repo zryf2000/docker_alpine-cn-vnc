@@ -6,7 +6,7 @@
 1、解决中文字符乱码。
 2、中文菜单。
 3、增加unrar。
-## Users
+## 用户
 User/pwd:
 * root / alpine
 * alpine / alpine (sudoer)
@@ -15,3 +15,12 @@ User/pwd:
   ```sh
    $ x11vnc -storepasswd 1234 /etc/x11vnc.pass
    ```
+## 使用方法
+ ```sh
+# clone git repository
+$ git clone https://github.com/zryf2000/docker_alpine-cn-vnc.git
+
+# build image
+$ cd zryf2000/docker_alpine-cn-vnc
+$ docker build -t zryf2000/docker_alpine-cn-vnc:v1 .
+``` 
